@@ -33,6 +33,10 @@ namespace ContosoU2018
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
+            // dboudreau : Add the school data services
+            services.AddDbContext<SchoolContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
             // Add application services.
             services.AddTransient<IEmailSender, EmailSender>();
 
@@ -54,6 +58,8 @@ namespace ContosoU2018
             }
 
             app.UseStaticFiles();
+
+            app.UseStatusCodePagesWithReExecute("/Error/{0}");
 
             app.UseAuthentication();
 
