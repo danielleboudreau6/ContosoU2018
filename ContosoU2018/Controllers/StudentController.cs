@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ContosoU2018.Data;
 using ContosoU2018.Models;
+using ContosoU2018.Models.SchoolViewModels;
 
 namespace ContosoU2018.Controllers
 {
@@ -158,6 +159,35 @@ namespace ContosoU2018.Controllers
             _context.Students.Remove(student);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        // dboudreau: create the stats report action
+        public async Task<IActionResult> Stats()
+        {
+            // populate the EnrollmentDateGroup ViewModel with 
+            // student statistics using LINQ (Language Integrated Query)
+            IQueryable<EnrollmentDateGroup> data =
+                from student in _context.Students // SQL FROM clause. (FROM is first, SELECT is last in LINQ.)
+                                                  // student represents a variable. Students represents the table in the database
+                                                  // context is school context declared in the Student Controller.
+                group student by student.EnrollmentDate into dateGroup // GROUP BY clause. 
+                select new EnrollmentDateGroup // SELECT EnrollmentDate, COUNT(*) AS StudentCount
+                {
+                    // can populate EnrollmentDate or StudentCount
+                    EnrollmentDate = dateGroup.Key,
+                    StudentCount = dateGroup.Count()
+                };
+
+            /*
+             * SELECT EnrollmentDate, COUNT(*) AS StudentCount
+             * FROM Students
+             * Group by EnrollmentDateGroup
+             */
+
+            // Create, Edit, Delete - dealing with single instances of objects.
+            // When dealing with a table of stats, we need to convert it to a list to loop through it and display.
+
+            return View(await data.ToListAsync());
         }
 
         private bool StudentExists(int id)
